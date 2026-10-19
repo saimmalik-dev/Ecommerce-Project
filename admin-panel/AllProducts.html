@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+</head>
+
+<body>
+
+
+    <div class="container row">
+        <div class=" col-span-3">
+            <ul>
+                <li>Dashboard</li>
+                <li>
+                    <a href="AddProduct.html">Add Product</a>
+                </li>
+                <li>
+
+                    <a href="AllProducts.html">All Product</a>
+                </li>
+                <li>All Products</li>
+                <li>Users</li>
+                <li>Orders</li>
+                <li>Chat Module</li>
+            </ul>
+        </div>
+
+
+        <div class=" col-span-9">
+
+
+
+            <h1> SHOWING ALL PRODUCTS</h1>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th scope="col">#</th>
+                        <th scope="col">Name</th>
+                        <th scope="col">Category</th>
+                        <th scope="col">Price</th>
+                        <th scope="col">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="table-body">
+
+                </tbody>
+            </table>
+
+        </div>
+    </div>
+
+
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
+        crossorigin="anonymous"></script>
+    <script type="module">
+        import { db } from "../firebaseConfig.js";
+        import { collection, getDocs } from "https://www.gstatic.com/firebasejs/13.0.0/firebase-firestore.js";
+
+        const productRef = collection(db, "products")
+        const products = document.getElementById("table-body")
+
+
+
+        const getAllProducts = async () => {
+            products.innerHTML = "Loading..."
+            try {
+                const allProducts = await getDocs(productRef)
+                products.innerHTML = null
+                allProducts.forEach(item => {
+                    const product = item.data();
+                    console.log("product", product);
+
+                    products.innerHTML = products.innerHTML + `
+                    
+                   <tr>
+                <th scope="row">1</th>
+                <td>${product.name}</td>
+                <td>${product.category}</td>
+                <td>${product.price}</td>
+                <td>
+                    <button class="btn btn-warning">Edit</button>
+                    <button class="btn btn-danger">Delete</button>
+                </td>
+            </tr>
+             
+
+                        `
+                });
+            } catch (error) {
+                console.error("Error adding product: ", error);
+                alert("Failed to add product. Please try again.");
+            }
+        }
+        getAllProducts()
+
+    </script>
+</body>
+
+</html>
+
+<!-- <!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+
+
+</head>
+
+<body>
+    <h1> SHOWING ALL PRODUCTS</h1>
+
+    <div id="products" class="container mx-auto row p-2 gap-3 ">
+
+    </div>
+
+    <script type="module">
+        import { db } from "../firebaseConfig.js";
+        import { collection, getDocs } from "https://www.gstatic.com/firebasejs/13.0.0/firebase-firestore.js";
+
+        const productRef = collection(db, "products")
+        const products = document.getElementById("products")
+
+
+
+        const getAllProducts = async () => {
+            products.innerHTML = "Loading..."
+            try {
+                const allProducts = await getDocs(productRef)
+                products.innerHTML = null
+                allProducts.forEach(item => {
+                    const product = item.data();
+                    console.log("product", product);
+
+                    products.innerHTML = products.innerHTML + `
+                    
+                    <div class="card col-4 " style="width: 22rem;">
+                        <img src=${product.imageLink} class="card-img-top" alt="..." width="300" height="500">
+                            <div class="card-body">
+                                <h5 class="card-title">${product.name}</h5>
+                                <p class="card-text">$${product.price}</p>
+                                <p class="card-text">${product.description}</p>
+                                <a href="#" class="btn btn-primary">Go somewhere</a>
+                            </div>
+                    </div>
+             
+
+                        `
+                });
+            } catch (error) {
+                console.error("Error adding product: ", error);
+                alert("Failed to add product. Please try again.");
+            }
+        }
+        getAllProducts()
+
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
+        crossorigin="anonymous"></script>
+</body>
+
+</html> -->

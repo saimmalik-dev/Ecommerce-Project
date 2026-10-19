@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+
+
+    <div class="container row">
+        <div class=" col-span-3">
+            <ul>
+                <li>Dashboard</li>
+                <li>
+                    <a href="AddProduct.html">Add Product</a>
+                </li>
+                <li>
+
+                    <a href="AllProducts.html">All Product</a>
+                </li>
+                <li>All Products</li>
+                <li>Users</li>
+                <li>Orders</li>
+                <li>Chat Module</li>
+            </ul>
+        </div>
+
+
+
+
+        <div class=" col-span-9">
+            <h1>Add Product</h1>
+            <form action="" id="add-product-form">
+                <input type="text" placeholder="Enter product name" id="product-name">
+                <input type="number" placeholder="Enter product price" id="product-price">
+                <input type="text" placeholder="Enter product description" id="product-description">
+                <input type="text" placeholder="Enter product image link" id="product-image-link">
+                <input type="text" placeholder="Enter product category" id="product-category">
+
+                <!-- <input type="number" placeholder="Enter product rating" id="product-quantity"> -->
+
+                <button type="submit">Add Product</button>
+            </form>
+        </div>
+
+        <script type="module">
+
+            import { db } from "../firebaseConfig.js";
+            import { collection, doc, setDoc, addDoc, } from "https://www.gstatic.com/firebasejs/13.0.0/firebase-firestore.js";
+
+            const addProductForm = document.getElementById('add-product-form');
+            console.log("addProductForm", addProductForm);
+
+
+
+            const name = document.getElementById('product-name');
+            const price = document.getElementById('product-price');
+            const description = document.getElementById('product-description');
+            const imageLink = document.getElementById('product-image-link');
+            const category = document.getElementById('product-category');
+
+
+
+            const productRef = collection(db, "products")
+
+
+
+            addProductForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                try {
+
+
+                    // generate random idfor product
+                    const docId = await doc(productRef);
+
+                    console.log("docId", docId);
+
+                    // now setting that random id to the product
+                    await setDoc(docId, {
+                        id: docId.id,
+                        name: name.value,
+                        price: price.value,
+                        description: description.value,
+                        imageLink: imageLink.value,
+                        category: category.value
+                    });
+
+                    alert("Product added successfully!");
+                    // addProductForm.reset();
+
+                    window.location.href = "AllProducts.html";
+                } catch (error) {
+                    console.error("Error adding product: ", error);
+                    alert("Failed to add product. Please try again.");
+                }
+
+
+
+
+
+            })
+        </script>
+</body>
+
+</html>
