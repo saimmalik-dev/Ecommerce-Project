@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+
+</head>
+
+<body>
+
+    <div class="container">
+        <div class="aside">
+            <ul>
+                <li>Dashboard</li>
+                <li>
+                    <a href="AddProduct.html">Add Product</a>
+                </li>
+                <li>
+                    <a href="AllProducts.html">All Product</a>
+                </li>
+                <li>
+                    <a href="./AllUsers.html">All Users</a>
+                </li>
+
+                <li>Orders</li>
+                <li>Chat Module</li>
+            </ul>
+        </div>
+
+
+        <div class="content">
+            <div class=" col-span-9">
+
+
+
+                <h1> SHOWING ALL Users</h1>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th scope="col">#</th>
+                            <th scope="col">Name</th>
+                            <th scope="col">Email</th>
+                            <th scope="col">Status</th>
+                            <th scope="col">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="table-body">
+                        <!-- <button onclick="deActiveUser">
+                            click
+                        </button> -->
+
+                        <!-- </button> -->
+                    </tbody>
+                </table>
+
+            </div>
+        </div>
+    </div>
+
+    <button id="de-active" onclick='deActiveUserFunc("fdjkfds")'>
+        click
+    </button>
+
+
+    <script type="module">
+        import { db } from "../firebaseConfig.js";
+        import { collection, getDocs, query, where, doc, updateDoc } from "https://www.gstatic.com/firebasejs/13.0.0/firebase-firestore.js";
+
+        const usersRef = collection(db, "users")
+
+        const userTable = document.getElementById("table-body")
+
+
+        const getAllUsers = async () => {
+
+
+
+            try {
+                const q = query(usersRef, where("role", "!=", "admin"));
+                const allUsers = await getDocs(q);
+                console.log("allUsers", allUsers);
+                let counter = 0
+
+
+
+                allUsers.forEach((item) => {
+                    const user = item.data();
+                    console.log("user", user);
+
+
+                    userTable.innerHTML = userTable.innerHTML + `
+     <tr>
+                            <th scope="col">${++counter}</th>
+                            <th scope="col">${user.name}</th>
+                            <th scope="col">${user.email}</th>
+                            <th scope="col">
+                                <span class="badge ${user.status === "active" ? "text-bg-success " : "text-bg-danger"}">${user.status}</span>
+                                </th>
+                            <th scope="col">
+                          
+         
+                                    <button 
+                                    
+                           type="button"    
+id="de-active"
+onclick='deActiveUserFunc("${user.userId}")'
+
+                                         class="btn btn-danger">De-Activate</button>
+                    <button class="btn btn-success"
+                    onclick='activateUserFunc("${user.userId}")'
+                    
+                    
+                    
+                    >Activate</button>
+                    
+                    </th>
+                        </tr>
+
+
+
+
+    `
+                });
+
+
+            } catch (err) {
+                console.log(err);
+
+            }
+        }
+
+
+        getAllUsers()
+
+        // const deactiveBtn = document.getElementById('de-active');
+
+        // // Add the click event listener
+        // deactiveBtn.addEventListener('click', function (event) {
+        // console.log('De-Activate button clicked!');
+        // // Add your custom logic here
+        // });
+
+        // 1. Define your function normally
+        const deActiveUserFunc = async (userId) => {
+            console.log("userId to de-activate:", userId);
+
+            if (!userId) return;
+            try {
+                // Your Firebase logic (Make sure to import 'doc' and 'updateDoc' from firestore at the top)
+                const userDocRef = doc(db, "users", userId);
+                await updateDoc(userDocRef, {
+                    status: "in-active"
+                });
+                alert("User deactivated successfully!");
+
+                // Optional: Re-render table to show updated status
+                userTable.innerHTML = "";
+                getAllUsers();
+            } catch (err) {
+                console.log("Error updating user status:", err);
+            }
+        }
+
+        // 2. Attach it to the window object to make it globally accessible
+        window.deActiveUserFunc = deActiveUserFunc;
+
+
+
+
+   const activateUserFunc = async (userId) => {
+            console.log("userId to activate:", userId);
+
+            if (!userId) return;
+            try {
+                // Your Firebase logic (Make sure to import 'doc' and 'updateDoc' from firestore at the top)
+                const userDocRef = doc(db, "users", userId);
+                await updateDoc(userDocRef, {
+                    status: "active"
+                });
+                alert("User activated successfully!");
+
+                // Optional: Re-render table to show updated status
+                userTable.innerHTML = "";
+                getAllUsers();
+            } catch (err) {
+                console.log("Error updating user status:", err);
+            }
+        }
+   window.activateUserFunc = activateUserFunc;
+
+
+
+        //        deActiveUserFunc()
+
+
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
+        crossorigin="anonymous"></script>
+
+</body>
+
+</html>

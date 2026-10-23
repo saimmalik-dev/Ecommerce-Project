@@ -1,11 +1,244 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
 </head>
+
 <body>
-    <h1>This is user website for ecom app</h1>
+    <nav class="navbar navbar-expand-lg bg-body-tertiary">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">Navbar</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"
+                aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link active" aria-current="page" href="#">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Link</a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
+                            aria-expanded="false">
+                            Dropdown
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="#">Action</a></li>
+                            <li><a class="dropdown-item" href="#">Another action</a></li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li><a class="dropdown-item" href="#">Something else here</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link disabled" aria-disabled="true">Disabled</a>
+                    </li>
+                </ul>
+                <form class="d-flex" role="search">
+                    <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search" />
+                    <button class="btn btn-outline-success" type="submit">Search</button>
+                </form>
+            </div>
+        </div>
+    </nav>
+
+
+    <div id="products" class="container mx-auto row p-2 gap-3 ">
+        <div>
+
+            <div>
+                <h1>
+                    Mobile
+                </h1>
+            </div>
+            <div>
+                products row
+                <div></div>
+                <div></div>
+                <div></div>
+                <div></div>
+            </div>
+        </div>
+    </div>
+
+
+
+
+
+    <h2>Want to create account?</h2>
+    <a href="./signup-page.html">SIGNUP HERE</a>
+
+
+    <script type="module">
+        import { db } from "./firebaseConfig.js";
+        import { collection, getDocs, query, where, doc, updateDoc } from "https://www.gstatic.com/firebasejs/13.0.0/firebase-firestore.js";
+
+
+        const productRef = collection(db, "products")
+        const products = document.getElementById("products")
+
+        const divideProductsCategories = (allProducts) => { // take raw products -> divide then into category wise products
+            const categories = new Set()
+            const prodcutArr = []
+            console.log("allProducts", allProducts);
+            allProducts.forEach(item => {
+                const product = item.data();
+                console.log("product", product)
+                categories.add(product.category)  //  {"electrnics","mobiles"}
+                prodcutArr.push(product) // [product-1, product-2, product-3]
+
+            })
+
+
+
+            console.log("categories:", categories);
+            const result = [
+                // {
+                //     category: "",
+                //     product: []
+                // }
+            ]
+
+            for (const category of categories) { // "electronics"
+                let products = []
+                for (let i = 0; i < prodcutArr.length; i++) {
+
+                    console.log(prodcutArr[i].category);
+                    if (prodcutArr[i].category == category) {
+                        products.push(prodcutArr[i])
+                    }
+                }
+                result.push({
+                    category: category,
+                    products: products
+                })
+            }
+
+            return result;
+
+        }
+
+
+        const getAllProducts = async () => {
+            products.innerHTML = "Loading..."
+            try {
+                const allProducts = await getDocs(productRef)
+
+                products.innerHTML = null
+                console.log("allProducts", allProducts);
+                const categorizedProducts = divideProductsCategories(allProducts)
+                console.log("categorizedProducts", categorizedProducts);
+
+                // allProducts.forEach(item => {
+                //     const product = item.data();
+                //     console.log("product", product);
+
+                //     products.innerHTML = products.innerHTML + `
+
+                //     <div class="card col-4 " style="width: 22rem;">
+                //         <img src=${product.imageLink} class="card-img-top" alt="..." width="300" height="300">
+                //             <div class="card-body">
+                //                 <h5 class="card-title">${product.name}</h5>
+                //                 <p class="card-text">$${product.price}</p>
+                //                 <p class="card-text">${product.description}</p>
+                //                 <a href="#" class="btn btn-primary">Go somewhere</a>
+                //             </div>
+                //     </div>
+
+
+                //         `
+                // });
+
+                categorizedProducts.forEach(item => {
+                    console.log("main object", item);
+
+                    const mainDiv = document.createElement("div");
+                    const categorydIV = document.createElement("div")
+                    const categoryH1 = document.createElement("h1")
+                    categoryH1.innerText = item.category;
+                    categorydIV.appendChild(categoryH1)
+                   
+                    // div.classList.add("container mx-auto row p-2 gap-3 ")
+                    const productDiv = document.createElement("div");
+                    productDiv.classList.add("container", "mx-auto", "row", "p-2", "gap-3")
+                    item.products.forEach(item => {
+                        const product = item;
+                        console.log("product", product);
+
+                        productDiv.innerHTML = productDiv.innerHTML + `
+                    
+                    <div class="card col-4 " style="width: 22rem;">
+                        <img src=${product.imageLink} class="card-img-top" alt="..." width="300" height="300">
+                            <div class="card-body">
+                                <h5 class="card-title">${product.name}</h5>
+                                <p class="card-text">$${product.price}</p>
+                                <p class="card-text">${product.description}</p>
+                                <a href="#" class="btn btn-primary">Go somewhere</a>
+                            </div>
+                    </div>
+             
+
+                        `
+                    });
+
+                    mainDiv.appendChild(categorydIV)
+                    mainDiv.appendChild(productDiv)
+                    products.appendChild(mainDiv)
+                });
+
+
+            } catch (error) {
+                console.error("Error adding product: ", error);
+                // alert("Failed to add product. Please try again.");
+            }
+        }
+        getAllProducts()
+
+
+
+        //         [
+        //             {
+        //                 //product data
+        //             },
+        //             {
+        //                 //product data
+        //             },
+        // ]
+
+
+        // [
+        //     {
+        //         category: "cars",
+        //         products: []
+        //     },
+        //     {
+        //         category: "mobiles",
+        //         products: []
+        //     }
+        // ] //-> all products
+
+
+
+
+
+    </script>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
+        crossorigin="anonymous"></script>
+
+
 </body>
+
 </html>
