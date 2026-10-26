@@ -44,8 +44,9 @@
                         <a class="nav-link disabled" aria-disabled="true">Disabled</a>
                     </li>
                 </ul>
-                <form class="d-flex" role="search">
-                    <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search" />
+                <form class="d-flex" id="form-search" role="search">
+                    <input class="form-control me-2" type="search" id="search" placeholder="Search"
+                        aria-label="Search" />
                     <button class="btn btn-outline-success" type="submit">Search</button>
                 </form>
             </div>
@@ -83,16 +84,16 @@
         import { db } from "./firebaseConfig.js";
         import { collection, getDocs, query, where, doc, updateDoc } from "https://www.gstatic.com/firebasejs/13.0.0/firebase-firestore.js";
 
-
+        let AllcategorizedProducts = []
         const productRef = collection(db, "products")
         const products = document.getElementById("products")
 
-        const divideProductsCategories = (allProducts) => { // take raw products -> divide then into category wise products
+        const divideProductsCategories = (allProducts, isFirebase = true) => { // take raw products -> divide then into category wise products
             const categories = new Set()
             const prodcutArr = []
             console.log("allProducts", allProducts);
             allProducts.forEach(item => {
-                const product = item.data();
+                const product = isFirebase ? item.data() : item;
                 console.log("product", product)
                 categories.add(product.category)  //  {"electrnics","mobiles"}
                 prodcutArr.push(product) // [product-1, product-2, product-3]
@@ -139,27 +140,9 @@
                 const categorizedProducts = divideProductsCategories(allProducts)
                 console.log("categorizedProducts", categorizedProducts);
 
-                // allProducts.forEach(item => {
-                //     const product = item.data();
-                //     console.log("product", product);
 
-                //     products.innerHTML = products.innerHTML + `
-
-                //     <div class="card col-4 " style="width: 22rem;">
-                //         <img src=${product.imageLink} class="card-img-top" alt="..." width="300" height="300">
-                //             <div class="card-body">
-                //                 <h5 class="card-title">${product.name}</h5>
-                //                 <p class="card-text">$${product.price}</p>
-                //                 <p class="card-text">${product.description}</p>
-                //                 <a href="#" class="btn btn-primary">Go somewhere</a>
-                //             </div>
-                //     </div>
-
-
-                //         `
-                // });
-
-                categorizedProducts.forEach(item => {
+                AllcategorizedProducts = categorizedProducts
+                AllcategorizedProducts.forEach(item => {
                     console.log("main object", item);
 
                     const mainDiv = document.createElement("div");
@@ -167,7 +150,7 @@
                     const categoryH1 = document.createElement("h1")
                     categoryH1.innerText = item.category;
                     categorydIV.appendChild(categoryH1)
-                   
+
                     // div.classList.add("container mx-auto row p-2 gap-3 ")
                     const productDiv = document.createElement("div");
                     productDiv.classList.add("container", "mx-auto", "row", "p-2", "gap-3")
@@ -183,7 +166,7 @@
                                 <h5 class="card-title">${product.name}</h5>
                                 <p class="card-text">$${product.price}</p>
                                 <p class="card-text">${product.description}</p>
-                                <a href="#" class="btn btn-primary">Go somewhere</a>
+                                <button  id="product" class="btn btn-primary" onclick='addToCart(${JSON.stringify(product)})'>Add to cart</button>
                             </div>
                     </div>
              
@@ -205,6 +188,80 @@
         getAllProducts()
 
 
+
+
+        const searchForm = document.getElementById("form-search")
+        searchForm.addEventListener("submit", (e) => {
+            e.preventDefault();
+            const searchInp = document.getElementById("search").value
+
+            console.log("search input", searchInp)
+            console.log("AllcategorizedProducts", AllcategorizedProducts)
+            let allProducts = [];
+            for (const categorizedProduct of AllcategorizedProducts) {
+                console.log("categorizedProduct", categorizedProduct)
+                const products = categorizedProduct.products
+                allProducts = [...allProducts, ...products]
+
+            }
+
+            console.log("allProducts", allProducts);
+
+
+            console.log("searchInp", searchInp);
+
+            const filteredProducts = allProducts.filter((item) => item.name.toLowerCase().includes(searchInp.toLowerCase()))
+            // console.log("item.name", item.name);
+
+
+            // return 
+
+            console.log("filteredProducts", filteredProducts);
+
+
+
+            const filteredCategorized = divideProductsCategories(filteredProducts, false);
+
+            products.innerHTML = null
+            filteredCategorized.forEach(item => {
+                console.log("main object", item);
+
+                const mainDiv = document.createElement("div");
+                const categorydIV = document.createElement("div")
+                const categoryH1 = document.createElement("h1")
+                categoryH1.innerText = item.category;
+                categorydIV.appendChild(categoryH1)
+
+                // div.classList.add("container mx-auto row p-2 gap-3 ")
+                const productDiv = document.createElement("div");
+                productDiv.classList.add("container", "mx-auto", "row", "p-2", "gap-3")
+                item.products.forEach(item => {
+                    const product = item;
+                    console.log("product", product);
+
+                    productDiv.innerHTML = productDiv.innerHTML + `
+                    
+                    <div class="card col-4 " style="width: 22rem;">
+                        <img src=${product.imageLink} class="card-img-top" alt="..." width="300" height="300">
+                            <div class="card-body">
+                                <h5 class="card-title">${product.name}</h5>
+                                <p class="card-text">$${product.price}</p>
+                                <p class="card-text">${product.description}</p>
+                                <button  id="product" class="btn btn-primary" onclick='addToCart(${JSON.stringify(product)})'>Add to cart</button>
+                            </div>
+                    </div>
+             
+
+                        `
+                });
+
+                mainDiv.appendChild(categorydIV)
+                mainDiv.appendChild(productDiv)
+                products.appendChild(mainDiv)
+            });
+
+
+        })
 
         //         [
         //             {
@@ -228,6 +285,35 @@
         // ] //-> all products
 
 
+
+        const addToCart = (product) => {
+            console.log("product", product)
+
+            // const myCart = JSON.parse(localStorage.getItem("cart"))  // "[]", []
+            const myCart = JSON.parse(localStorage.getItem("cart")) || []
+
+            const existingItem = myCart.find((item) => item.id == product.id)
+            console.log("existingItem", existingItem);
+            if (existingItem != undefined) {
+                // existingItem.qty++
+                existingItem.qty = existingItem.qty + 1;
+                localStorage.setItem("cart", JSON.stringify(myCart))
+                return;
+            }
+
+            const cartItem = {
+                id: product.id,
+                name: product.name,
+                price: product.price,
+                qty: 1,
+            }
+            myCart.push(cartItem)
+            localStorage.setItem("cart", JSON.stringify(myCart))
+
+        }
+
+
+        window.addToCart = addToCart
 
 
 
